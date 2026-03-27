@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Lembaga;
 use App\Models\IzinLembaga;
+use Illuminate\Support\Facades\DB;
 
 class PKBMController extends Controller
 {
@@ -37,45 +38,45 @@ class PKBMController extends Controller
     /**
      * Simpan data
      */
-public function store(Request $request)
-{
-    $request->validate([
-        'npsn'          => 'required|unique:lembaga,npsn',
-        'nama_lembaga'  => 'required',
-        'pengelola'     => 'required',
-        'alamat'        => 'required',
-        'telepon'       => 'required',
-        'no_sertifikat' => 'nullable|string',
-        'masa_berlaku'  => 'nullable|date',
-        'jenis_izin'    => 'nullable|in:baru,perpanjangan,operasional',
-        'status'        => 'nullable|in:aktif,habis,kadaluarsa',
-        'keterangan'    => 'nullable|string',
-    ]);
-
-    
-    $lembaga = Lembaga::create([
-        'npsn'             => $request->npsn,
-        'nama_lembaga'     => $request->nama_lembaga,
-        'pengelola'        => $request->pengelola,
-        'alamat'           => $request->alamat,
-        'telepon'          => $request->telepon,
-        'jenis_lembaga_id' => 1,
-        'keterangan'       => $request->keterangan
-    ]);
-
-    if ($request->no_sertifikat || $request->masa_berlaku) {
-        IzinLembaga::create([
-            'lembaga_id'    => $lembaga->id,
-            'no_sertifikat' => $request->no_sertifikat,
-            'masa_berlaku'  => $request->masa_berlaku,
-            'jenis_izin'    => $request->jenis_izin ?? 'baru',
-            'status'        => $request->status ?? 'aktif',
-            'keterangan'    => $request->keterangan,
+    public function store(Request $request)
+    {
+        $request->validate([
+            'npsn'          => 'required|unique:lembaga,npsn',
+            'nama_lembaga'  => 'required',
+            'pengelola'     => 'required',
+            'alamat'        => 'required',
+            'telepon'       => 'required',
+            'no_sertifikat' => 'nullable|string',
+            'masa_berlaku'  => 'nullable|date',
+            'jenis_izin'    => 'nullable|in:baru,perpanjangan,operasional',
+            'status'        => 'nullable|in:aktif,habis,kadaluarsa',
+            'keterangan'    => 'nullable|string',
         ]);
-    }
 
-    return redirect()->route('pkbm.index')->with('success', 'Data PKBM berhasil ditambahkan');
-}
+        DB::transaction(function () use ($request) {
+            $lembaga = Lembaga::create([
+                'npsn'             => $request->npsn,
+                'nama_lembaga'     => $request->nama_lembaga,
+                'pengelola'        => $request->pengelola,
+                'alamat'           => $request->alamat,
+                'telepon'          => $request->telepon,
+                'jenis_lembaga_id' => 1,
+            ]);
+
+            if ($request->no_sertifikat || $request->masa_berlaku || $request->keterangan) {
+                IzinLembaga::create([
+                    'lembaga_id'    => $lembaga->id,
+                    'no_sertifikat' => $request->no_sertifikat,
+                    'masa_berlaku'  => $request->masa_berlaku,
+                    'jenis_izin'    => $request->jenis_izin ?? 'baru',
+                    'status'        => $request->status ?? 'aktif',
+                    'keterangan'    => $request->keterangan,
+                ]);
+            }
+        });
+
+        return redirect()->route('pkbm.index')->with('success', 'Data PKBM berhasil ditambahkan');
+    }
     /**
      * Detail (optional)
      */
@@ -103,32 +104,37 @@ public function store(Request $request)
             'pengelola'     => 'required',
             'alamat'        => 'required',
             'telepon'       => 'required',
+            'no_sertifikat' => 'nullable|string',
+            'masa_berlaku'  => 'nullable|date',
+            'keterangan'    => 'nullable|string',
             'status'        => 'nullable|in:aktif,habis,kadaluarsa',
             'jenis_izin'    => 'nullable|in:baru,perpanjangan,operasional,pendirian',
         ]);
 
         $lembaga = Lembaga::findOrFail($id);
 
-        // Update data Lembaga
-        $lembaga->update([
-            'npsn'         => $request->npsn,
-            'nama_lembaga' => $request->nama_lembaga, // Gunakan nama_lembaga
-            'pengelola'    => $request->pengelola,
-            'alamat'       => $request->alamat,
-            'telepon'      => $request->telepon,
-        ]);
+        DB::transaction(function () use ($request, $lembaga) {
+            // Update data Lembaga
+            $lembaga->update([
+                'npsn'         => $request->npsn,
+                'nama_lembaga' => $request->nama_lembaga, // Gunakan nama_lembaga
+                'pengelola'    => $request->pengelola,
+                'alamat'       => $request->alamat,
+                'telepon'      => $request->telepon,
+            ]);
 
-        // Update atau Create Izin menggunakan updateOrCreate agar lebih ringkas
-        $lembaga->izin()->updateOrCreate(
-            ['lembaga_id' => $lembaga->id], // Key pencarian
-            [
-                'no_sertifikat' => $request->no_sertifikat,
-                'masa_berlaku'  => $request->masa_berlaku,
-                'status'        => $request->status ?? 'aktif',
-                'jenis_izin'    => $request->jenis_izin ?? 'operasional',
-                'keterangan'    => $request->keterangan,
-            ]
-        );
+            // Update atau Create Izin menggunakan updateOrCreate agar lebih ringkas
+            $lembaga->izin()->updateOrCreate(
+                ['lembaga_id' => $lembaga->id], // Key pencarian
+                [
+                    'no_sertifikat' => $request->no_sertifikat,
+                    'masa_berlaku'  => $request->masa_berlaku,
+                    'status'        => $request->status ?? 'aktif',
+                    'jenis_izin'    => $request->jenis_izin ?? 'operasional',
+                    'keterangan'    => $request->keterangan,
+                ]
+            );
+        });
 
         return redirect()->route('pkbm.index')
             ->with('success', 'Data PKBM berhasil diupdate');
@@ -141,11 +147,7 @@ public function store(Request $request)
     {
         $lembaga = Lembaga::findOrFail($id);
 
-        // hapus izin dulu
-        if ($lembaga->izin) {
-            $lembaga->izin->delete();
-        }
-
+        // Relasi `izin` akan otomatis terhapus karena ada cascadeOnDelete di database migration
         $lembaga->delete();
 
         return redirect()->route('pkbm.index')
