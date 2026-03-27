@@ -13,10 +13,10 @@ return new class extends Migration
             $table->foreignId('lembaga_id')
                   ->constrained('lembaga')
                   ->cascadeOnDelete();
-            $table->string('no_sertifikat');
-            $table->date('masa_berlaku');
-            $table->string('status')->nullable();
-            $table->enum('jenis_izin', ['baru', 'perpanjangan']);
+            $table->string('no_sertifikat')->nullable();
+            $table->date('masa_berlaku')->nullable();
+            $table->enum('status', ['aktif', 'habis', 'kadaluarsa'])->default('aktif');
+            $table->enum('jenis_izin', ['baru', 'perpanjangan', 'operasional'])->nullable();
             $table->text('keterangan')->nullable();
 
             $table->timestamps();

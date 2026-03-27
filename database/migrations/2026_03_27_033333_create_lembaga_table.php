@@ -27,7 +27,6 @@ return new class extends Migration
                   ->constrained('kategori_paud')
                   ->nullOnDelete();
 
-            $table->enum('status', ['aktif', 'tidak aktif'])->default('aktif');
             $table->text('keterangan')->nullable();
 
             $table->timestamps();

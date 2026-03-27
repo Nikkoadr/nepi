@@ -4,24 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Lembaga extends Model
+class IzinLembaga extends Model
 {
-    protected $table = 'lembaga';
+    protected $table = 'izin_lembaga';
 
     protected $fillable = [
-        'jenis_lembaga_id',
-        'kategori_paud_id',
-        'npsn',
-        'nama_lembaga',
-        'pengelola',
-        'alamat',
-        'telepon',
+        'lembaga_id',
+        'no_sertifikat',
+        'masa_berlaku',
+        'status',
+        'jenis_izin',
+        'keterangan'
     ];
 
 
-    public function jenis()
+    public function lembaga()
     {
-        return $this->belongsTo(JenisLembaga::class, 'jenis_lembaga_id');
+        return $this->belongsTo(Lembaga::class);
     }
 
     public function kategoriPaud()
@@ -34,12 +33,4 @@ class Lembaga extends Model
         return $this->hasOne(IzinLembaga::class, 'lembaga_id');
     }
 
-    public function getNamaLengkapAttribute()
-    {
-        if ($this->jenis && $this->jenis->nama == 'PAUD' && $this->kategoriPaud) {
-            return $this->nama_lembaga . ' (' . $this->kategoriPaud->nama . ')';
-        }
-
-        return $this->nama_lembaga;
-    }
 }

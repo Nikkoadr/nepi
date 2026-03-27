@@ -33,13 +33,4 @@ class Lembaga extends Model
     {
         return $this->hasOne(IzinLembaga::class, 'lembaga_id');
     }
-
-    public function getNamaLengkapAttribute()
-    {
-        if ($this->jenis && $this->jenis->nama == 'PAUD' && $this->kategoriPaud) {
-            return $this->nama_lembaga . ' (' . $this->kategoriPaud->nama . ')';
-        }
-
-        return $this->nama_lembaga;
-    }
 }
