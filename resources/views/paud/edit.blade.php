@@ -77,26 +77,6 @@
                             value="{{ old('no_sertifikat', $izin->no_sertifikat ?? '') }}">
                     </div>
 
-                    <!-- Jenis Izin -->
-                    <div class="col-md-6 mb-3">
-                        <label>Jenis Izin</label>
-                        <select name="jenis_izin" class="form-control">
-                            <option value="">Pilih</option>
-                            <option value="baru"
-                                {{ (old('jenis_izin', $izin->jenis_izin ?? '') == 'baru') ? 'selected' : '' }}>
-                                Baru
-                            </option>
-                            <option value="perpanjangan"
-                                {{ (old('jenis_izin', $izin->jenis_izin ?? '') == 'perpanjangan') ? 'selected' : '' }}>
-                                Perpanjangan
-                            </option>
-                            <option value="operasional"
-                                {{ (old('jenis_izin', $izin->jenis_izin ?? '') == 'operasional') ? 'selected' : '' }}>
-                                Operasional
-                            </option>
-                        </select>
-                    </div>
-
                     <!-- Masa Berlaku -->
                     <div class="col-md-6 mb-3">
                         <label>Masa Berlaku</label>

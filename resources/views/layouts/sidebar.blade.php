@@ -49,31 +49,10 @@
         </a>
     </li>
 
-    <hr class="sidebar-divider">
-
-    <!-- LAPORAN -->
-    <div class="sidebar-heading">
-        Laporan
-    </div>
-
     <li class="nav-item {{ request()->routeIs('laporan.index') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('laporan.index') }}">
             <i class="fas fa-fw fa-file-alt"></i>
             <span>Laporan Lembaga</span>
-        </a>
-    </li>
-
-    <li class="nav-item {{ request()->routeIs('laporan.izin') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('laporan.izin') }}">
-            <i class="fas fa-fw fa-file-signature"></i>
-            <span>Laporan Izin</span>
-        </a>
-    </li>
-
-    <li class="nav-item {{ request()->routeIs('laporan.expired') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('laporan.expired') }}">
-            <i class="fas fa-fw fa-exclamation-triangle"></i>
-            <span>Izin Kadaluarsa</span>
         </a>
     </li>
 

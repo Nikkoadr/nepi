@@ -33,4 +33,14 @@ class Lembaga extends Model
     {
         return $this->hasOne(IzinLembaga::class, 'lembaga_id');
     }
+
+    public function getEditRouteAttribute()
+{
+    return match ($this->jenis_lembaga_id) {
+        1 => route('pkbm.edit', $this->id),
+        2 => route('lkp.edit', $this->id),
+        3 => route('paud.edit', $this->id),
+        default => '#',
+    };
+}
 }
