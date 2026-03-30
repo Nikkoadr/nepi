@@ -32,5 +32,6 @@ class IzinLembaga extends Model
     {
         return $this->hasOne(IzinLembaga::class, 'lembaga_id');
     }
+    
 
 }

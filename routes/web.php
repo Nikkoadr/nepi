@@ -8,6 +8,7 @@ use App\Http\Controllers\PKBMController;
 use App\Http\Controllers\LKPController;
 use App\Http\Controllers\PAUDController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\NotifikasiController;
 
 Route::get('/', function () {
     return auth()->check()
@@ -26,5 +27,7 @@ Route::resource('lkp', LKPController::class);
 Route::resource('paud', PAUDController::class);
 
 Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
-Route::get('/laporan/izin', [LaporanController::class, 'izin'])->name('laporan.izin');
-Route::get('/laporan/expired', [LaporanController::class, 'expired'])->name('laporan.expired');
+Route::get('/laporan/cetak', [LaporanController::class, 'cetak'])->name('laporan.cetak');
+
+Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
+Route::get('/notifikasi/{id}', [NotifikasiController::class, 'show'])->name('notifikasi.show');

@@ -10,8 +10,7 @@ class JenisLembaga extends Model
 
     protected $fillable = ['nama'];
 
-    public function lembaga()
-    {
-        return $this->hasMany(Lembaga::class);
+    public function lembaga() {
+        return $this->hasMany(Lembaga::class, 'jenis_lembaga_id');
     }
 }

@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('no_sertifikat')->nullable();
             $table->date('masa_berlaku')->nullable();
             $table->enum('status', ['aktif', 'habis', 'kadaluarsa'])->default('aktif');
-            $table->enum('jenis_izin', ['baru', 'perpanjangan', 'operasional'])->nullable();
             $table->text('keterangan')->nullable();
 
             $table->timestamps();
