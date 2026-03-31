@@ -10,12 +10,9 @@ return new class extends Migration
     {
         Schema::create('izin_lembaga', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('lembaga_id')
-                  ->constrained('lembaga')
-                  ->cascadeOnDelete();
+            $table->foreignId('lembaga_id')->constrained('lembaga')->cascadeOnDelete();
             $table->string('no_sertifikat')->nullable();
             $table->date('masa_berlaku')->nullable();
-            $table->enum('status', ['aktif', 'habis', 'kadaluarsa'])->default('aktif');
             $table->text('keterangan')->nullable();
 
             $table->timestamps();

@@ -38,7 +38,7 @@
 
                                 <div class="text-center">
                                     <h1 class="h4 text-gray-900 mb-2">
-                                        SISTEM INFORMASI MANAJEMEN PERIZINAN
+                                        <b>SISTEM INFORMASI MANAJEMEN PERIZINAN</b>
                                     </h1>
                                     <p class="mb-4 small text-muted">
                                         Dinas Pendidikan Kota Cirebon
@@ -100,16 +100,16 @@
 
                                 </form>
 
-                                <hr>
+                                {{-- <hr> --}}
 
                                 <!-- FORGOT -->
-                                @if (Route::has('password.request'))
+                                {{-- @if (Route::has('password.request'))
                                 <div class="text-center">
                                     <a class="small" href="{{ route('password.request') }}">
                                         Lupa Password?
                                     </a>
                                 </div>
-                                @endif
+                                @endif --}}
 
                                 <!-- REGISTER -->
                                 @if (Route::has('register'))

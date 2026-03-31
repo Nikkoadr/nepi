@@ -85,16 +85,6 @@
                             value="{{ old('masa_berlaku') }}">
                     </div>
 
-                    <!-- Status -->
-                    <div class="col-md-6 mb-3">
-                        <label>Status</label>
-                        <select name="status" class="form-control">
-                            <option value="aktif" {{ old('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                            <option value="habis" {{ old('status') == 'habis' ? 'selected' : '' }}>Habis</option>
-                            <option value="kadaluarsa" {{ old('status') == 'kadaluarsa' ? 'selected' : '' }}>Kadaluarsa</option>
-                        </select>
-                    </div>
-
                     <!-- Keterangan -->
                     <div class="col-md-12 mb-3">
                         <label>Keterangan</label>

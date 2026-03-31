@@ -7,6 +7,7 @@ use App\Models\Lembaga;
 use App\Models\IzinLembaga;
 use App\Models\JenisLembaga;
 use App\Models\KategoriPaud;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -25,25 +26,43 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-public function index()
-{
-    $totalLembaga = Lembaga::count();
-    $izinAktif = IzinLembaga::where('status', 'aktif')->count();
-    $izinExpired = IzinLembaga::whereIn('status', ['habis', 'kadaluarsa'])->count();
-    
-    $jenisLembagaData = JenisLembaga::withCount('lembaga')->get();
-    
-    $statusIzinData = [
-        'aktif' => IzinLembaga::where('status', 'aktif')->count(),
-        'habis' => IzinLembaga::where('status', 'habis')->count(),
-        'kadaluarsa' => IzinLembaga::where('status', 'kadaluarsa')->count(),
-    ];
+    public function index()
+    {
+        $today = Carbon::today();
+        $oneMonthFromNow = Carbon::today()->addDays(30);
 
-    $kategoriPaudData = KategoriPaud::withCount('lembaga')->get();
+        // 1. Total Semua Lembaga
+        $totalLembaga = Lembaga::count();
 
-    return view('home', compact(
-        'totalLembaga', 'izinAktif', 'izinExpired', 
-        'jenisLembagaData', 'statusIzinData', 'kategoriPaudData'
-    ));
-}
+        // 2. Izin Aktif (Masa berlaku masih di atas hari ini)
+        $izinAktif = IzinLembaga::whereDate('masa_berlaku', '>', $today)->count();
+
+        // 3. Izin Expired (Masa berlaku sudah lewat atau hari ini)
+        $izinExpired = IzinLembaga::whereDate('masa_berlaku', '<=', $today)->count();
+
+        // 4. Izin Hampir Habis (Kurang dari 30 hari tapi belum expired)
+        $izinHampirHabis = IzinLembaga::whereDate('masa_berlaku', '>', $today)
+            ->whereDate('masa_berlaku', '<=', $oneMonthFromNow)
+            ->count();
+
+        // 5. Data untuk Chart/Statistik
+        $statusIzinData = [
+            'aktif'         => IzinLembaga::whereDate('masa_berlaku', '>', $oneMonthFromNow)->count(),
+            'hampir_habis'  => $izinHampirHabis,
+            'kadaluarsa'    => $izinExpired,
+        ];
+
+        $jenisLembagaData = JenisLembaga::withCount('lembaga')->get();
+        $kategoriPaudData = KategoriPaud::withCount('lembaga')->get();
+
+        return view('home', compact(
+            'totalLembaga',
+            'izinAktif',
+            'izinExpired',
+            'izinHampirHabis',
+            'jenisLembagaData',
+            'statusIzinData',
+            'kategoriPaudData'
+        ));
+    }
 }

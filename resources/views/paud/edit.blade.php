@@ -63,11 +63,6 @@
                 <hr>
 
                 <h5 class="mb-3">Data Izin</h5>
-
-                @php
-                    $izin = $data->izin; 
-                @endphp
-
                 <div class="row">
 
                     <!-- No Sertifikat -->
@@ -82,25 +77,6 @@
                         <label>Masa Berlaku</label>
                         <input type="date" name="masa_berlaku" class="form-control"
                             value="{{ old('masa_berlaku', $izin->masa_berlaku ?? '') }}">
-                    </div>
-
-                    <!-- Status -->
-                    <div class="col-md-6 mb-3">
-                        <label>Status</label>
-                        <select name="status" class="form-control">
-                            <option value="aktif"
-                                {{ (old('status', $izin->status ?? '') == 'aktif') ? 'selected' : '' }}>
-                                Aktif
-                            </option>
-                            <option value="habis"
-                                {{ (old('status', $izin->status ?? '') == 'habis') ? 'selected' : '' }}>
-                                Habis
-                            </option>
-                            <option value="kadaluarsa"
-                                {{ (old('status', $izin->status ?? '') == 'kadaluarsa') ? 'selected' : '' }}>
-                                Kadaluarsa
-                            </option>
-                        </select>
                     </div>
 
                     <!-- Keterangan -->

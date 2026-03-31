@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Lembaga;
 use App\Models\IzinLembaga;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PKBMController extends Controller
 {
@@ -14,30 +15,50 @@ class PKBMController extends Controller
         $this->middleware('auth');
     }
 
-    /**
-     * Display list PKBM
-     */
     public function index()
     {
+        $today = Carbon::today();
+
         $data = Lembaga::with('izin')
-            ->where('jenis_lembaga_id', 1) // PKBM
+            ->where('jenis_lembaga_id', 1)
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($item) use ($today) {
+                if (!$item->izin || !$item->izin->masa_berlaku) {
+                    $item->status_teks = "Data Izin Tidak Ada";
+                    $item->status_label = "secondary";
+                    return $item;
+                }
+
+                $masaBerlaku = Carbon::parse($item->izin->masa_berlaku);
+
+                if ($masaBerlaku->isPast()) {
+                    $item->status_teks = "Kadaluarsa";
+                    $item->status_label = "danger";
+                } else {
+                    $sisaHari = $today->diffInDays($masaBerlaku, false);
+
+                    if ($sisaHari <= 30) {
+                        $item->status_teks = "Masa berlaku kurang dari " . $sisaHari . " hari";
+                        $item->status_label = "warning";
+                    } else {
+
+                        $item->status_teks = "Aktif";
+                        $item->status_label = "success";
+                    }
+                }
+
+                return $item;
+            });
 
         return view('pkbm.index', compact('data'));
     }
 
-    /**
-     * Form tambah
-     */
     public function create()
     {
         return view('pkbm.create');
     }
 
-    /**
-     * Simpan data
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -48,8 +69,6 @@ class PKBMController extends Controller
             'telepon'       => 'required',
             'no_sertifikat' => 'nullable|string',
             'masa_berlaku'  => 'nullable|date',
-            'jenis_izin'    => 'nullable|in:baru,perpanjangan,operasional',
-            'status'        => 'nullable|in:aktif,habis,kadaluarsa',
             'keterangan'    => 'nullable|string',
         ]);
 
@@ -68,8 +87,6 @@ class PKBMController extends Controller
                     'lembaga_id'    => $lembaga->id,
                     'no_sertifikat' => $request->no_sertifikat,
                     'masa_berlaku'  => $request->masa_berlaku,
-                    'jenis_izin'    => $request->jenis_izin ?? 'baru',
-                    'status'        => $request->status ?? 'aktif',
                     'keterangan'    => $request->keterangan,
                 ]);
             }
@@ -77,21 +94,15 @@ class PKBMController extends Controller
 
         return redirect()->route('pkbm.index')->with('success', 'Data PKBM berhasil ditambahkan');
     }
-    /**
-     * Detail (optional)
-     */
+
     public function show(string $id)
     {
         $data = Lembaga::with('izin')->findOrFail($id);
         return view('pkbm.show', compact('data'));
     }
 
-    /**
-     * Form edit
-     */
     public function edit(string $id)
     {
-        // Pastikan nama relasi di model adalah 'izin'
         $data = Lembaga::with('izin')->findOrFail($id);
         return view('pkbm.edit', compact('data'));
     }
@@ -100,37 +111,31 @@ class PKBMController extends Controller
     {
         $request->validate([
             'npsn'          => 'required|unique:lembaga,npsn,' . $id,
-            'nama_lembaga'  => 'required', // Samakan dengan name di input Blade
+            'nama_lembaga'  => 'required',
             'pengelola'     => 'required',
             'alamat'        => 'required',
             'telepon'       => 'required',
             'no_sertifikat' => 'nullable|string',
             'masa_berlaku'  => 'nullable|date',
             'keterangan'    => 'nullable|string',
-            'status'        => 'nullable|in:aktif,habis,kadaluarsa',
-            'jenis_izin'    => 'nullable|in:baru,perpanjangan,operasional,pendirian',
         ]);
 
         $lembaga = Lembaga::findOrFail($id);
 
         DB::transaction(function () use ($request, $lembaga) {
-            // Update data Lembaga
             $lembaga->update([
                 'npsn'         => $request->npsn,
-                'nama_lembaga' => $request->nama_lembaga, // Gunakan nama_lembaga
+                'nama_lembaga' => $request->nama_lembaga,
                 'pengelola'    => $request->pengelola,
                 'alamat'       => $request->alamat,
                 'telepon'      => $request->telepon,
             ]);
 
-            // Update atau Create Izin menggunakan updateOrCreate agar lebih ringkas
             $lembaga->izin()->updateOrCreate(
-                ['lembaga_id' => $lembaga->id], // Key pencarian
+                ['lembaga_id' => $lembaga->id],
                 [
                     'no_sertifikat' => $request->no_sertifikat,
                     'masa_berlaku'  => $request->masa_berlaku,
-                    'status'        => $request->status ?? 'aktif',
-                    'jenis_izin'    => $request->jenis_izin ?? 'operasional',
                     'keterangan'    => $request->keterangan,
                 ]
             );
@@ -140,14 +145,11 @@ class PKBMController extends Controller
             ->with('success', 'Data PKBM berhasil diupdate');
     }
 
-    /**
-     * Hapus data
-     */
     public function destroy(string $id)
     {
         $lembaga = Lembaga::findOrFail($id);
 
-        // Relasi `izin` akan otomatis terhapus karena ada cascadeOnDelete di database migration
+
         $lembaga->delete();
 
         return redirect()->route('pkbm.index')

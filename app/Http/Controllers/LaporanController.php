@@ -26,45 +26,75 @@ class LaporanController extends Controller
 
     public function expired(Request $request)
     {
-        // Override status to expired
-        $request->merge(['status' => 'expired']); 
+        $request->merge(['status' => 'expired']);
         return $this->generateLaporan($request, 'Lembaga Izin Kadaluarsa', 'laporan.expired');
     }
 
-    private function generateLaporan(Request $request, $title, $route_name)
+    /**
+     * Logic inti untuk mengambil data dengan filter tanggal (Real-time)
+     */
+    private function getLaporanData(Request $request)
     {
         $query = Lembaga::with(['izin', 'jenis']);
+        $today = Carbon::today();
 
-        // Filter Jenis Lembaga
+        // 1. Filter Jenis Lembaga
         if ($request->filled('jenis_lembaga_id')) {
             $query->where('jenis_lembaga_id', $request->jenis_lembaga_id);
         }
 
-        // Filter Status Izin
+        // 2. Filter Status Izin Berdasarkan Tanggal (Tanpa kolom status)
         if ($request->filled('status')) {
-            if ($request->status === 'expired') {
-                $query->whereHas('izin', function($q) {
-                    $q->whereIn('status', ['habis', 'kadaluarsa']);
-                });
-            } else if($request->status === 'aktif') {
-                $query->whereHas('izin', function($q) use ($request) {
-                    $q->where('status', 'aktif');
-                });
-            } else {
-                $query->whereHas('izin', function($q) use ($request) {
-                    $q->where('status', $request->status);
-                });
-            }
+            $query->whereHas('izin', function ($q) use ($today, $request) {
+                if ($request->status === 'expired') {
+                    $q->whereDate('masa_berlaku', '<=', $today);
+                } elseif ($request->status === 'aktif') {
+                    $q->whereDate('masa_berlaku', '>', $today);
+                } elseif ($request->status === 'warning') {
+                    $q->whereDate('masa_berlaku', '>', $today)
+                        ->whereDate('masa_berlaku', '<=', $today->copy()->addDays(30));
+                }
+            });
         }
 
-        // Filter Rentang Tanggal Masa Berlaku
+        // 3. Filter Rentang Tanggal Manual
         if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereHas('izin', function($q) use ($request) {
+            $query->whereHas('izin', function ($q) use ($request) {
                 $q->whereBetween('masa_berlaku', [$request->start_date, $request->end_date]);
             });
         }
 
         $data = $query->latest()->get();
+
+        // 4. Mapping Status secara dinamis (PENTING: Agar index & cetak punya data yang sama)
+        return $data->map(function ($item) use ($today) {
+            if ($item->izin && $item->izin->masa_berlaku) {
+                $masaBerlaku = Carbon::parse($item->izin->masa_berlaku);
+
+                if ($masaBerlaku->isPast()) {
+                    $item->status_teks = "Kadaluarsa";
+                    $item->status_label = "danger";
+                } else {
+                    $sisaHari = $today->diffInDays($masaBerlaku, false);
+                    if ($sisaHari <= 30) {
+                        $item->status_teks = "Hampir Habis ($sisaHari Hari)";
+                        $item->status_label = "warning";
+                    } else {
+                        $item->status_teks = "Aktif";
+                        $item->status_label = "success";
+                    }
+                }
+            } else {
+                $item->status_teks = "N/A";
+                $item->status_label = "secondary";
+            }
+            return $item;
+        });
+    }
+
+    private function generateLaporan(Request $request, $title, $route_name)
+    {
+        $data = $this->getLaporanData($request);
         $jenisLembaga = JenisLembaga::all();
 
         return view('laporan.index', compact('data', 'jenisLembaga', 'title', 'route_name'));
@@ -72,31 +102,8 @@ class LaporanController extends Controller
 
     public function cetak(Request $request)
     {
-        $query = Lembaga::with(['izin', 'jenis']);
-
-        if ($request->filled('jenis_lembaga_id')) {
-            $query->where('jenis_lembaga_id', $request->jenis_lembaga_id);
-        }
-
-        if ($request->filled('status')) {
-            if ($request->status === 'expired') {
-                $query->whereHas('izin', function($q) {
-                    $q->whereIn('status', ['habis', 'kadaluarsa']);
-                });
-            } else {
-                $query->whereHas('izin', function($q) use ($request) {
-                    $q->where('status', $request->status);
-                });
-            }
-        }
-
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereHas('izin', function($q) use ($request) {
-                $q->whereBetween('masa_berlaku', [$request->start_date, $request->end_date]);
-            });
-        }
-
-        $data = $query->latest()->get();
+        // Sekarang cetak memanggil fungsi yang sama dengan index
+        $data = $this->getLaporanData($request);
         $title = "Laporan Rekapitulasi Data Lembaga";
 
         return view('laporan.cetak', compact('data', 'title'));

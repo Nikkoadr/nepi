@@ -53,17 +53,16 @@
                             <td>{{ $item->kategoriPaud->nama ?? '-' }}</td>
 
                             <td>
-                                @php $status = $item->izin->status ?? null; @endphp
-
-                                @if($status == 'aktif')
-                                    <span class="badge badge-success">Aktif</span>
-                                @elseif($status == 'kadaluarsa')
-                                    <span class="badge badge-danger">Kadaluarsa</span>
-                                @elseif($status == 'habis')
-                                    <span class="badge badge-warning">Habis</span>
-                                @else
-                                    <span class="badge badge-secondary">-</span>
-                                @endif
+                                <span class="badge badge-{{ $item->status_label }} p-2">
+                                    @if($item->status_label == 'danger')
+                                        <i class="fas fa-exclamation-circle"></i>
+                                    @elseif($item->status_label == 'warning')
+                                        <i class="fas fa-clock"></i>
+                                    @else
+                                        <i class="fas fa-check-circle"></i>
+                                    @endif
+                                    {{ $item->status_teks }}
+                                </span>
                             </td>
 
                             <!-- AKSI -->

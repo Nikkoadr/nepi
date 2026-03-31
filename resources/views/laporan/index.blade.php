@@ -7,7 +7,6 @@
 
     <h1 class="h3 mb-4 text-gray-800">{{ $title }}</h1>
 
-    <!-- Filter Card -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Filter Laporan</h6>
@@ -32,9 +31,8 @@
                         <select name="status" class="form-control" {{ $route_name == 'laporan.expired' ? 'disabled' : '' }}>
                             <option value="">Semua Status</option>
                             <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                            <option value="habis" {{ request('status') == 'habis' ? 'selected' : '' }}>Habis</option>
-                            <option value="kadaluarsa" {{ request('status') == 'kadaluarsa' ? 'selected' : '' }}>Kadaluarsa</option>
-                            <option value="expired" {{ request('status') == 'expired' ? 'selected' : '' }}>Habis & Kadaluarsa (Expired)</option>
+                            <option value="warning" {{ request('status') == 'warning' ? 'selected' : '' }}>Hampir Habis</option>
+                            <option value="expired" {{ request('status') == 'expired' ? 'selected' : '' }}>Kadaluarsa</option>
                         </select>
                         @if($route_name == 'laporan.expired')
                             <input type="hidden" name="status" value="expired">
@@ -69,11 +67,10 @@
         </div>
     </div>
 
-    <!-- Data Table -->
     <div class="card shadow mb-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered" id="datatable" width="100%">
+                <table class="table table-bordered" id="datatable" width="100%" cellspacing="0">
                     <thead class="bg-primary text-white">
                         <tr>
                             <th>No</th>
@@ -88,7 +85,6 @@
                     </thead>
                     <tbody>
                         @foreach($data as $item)
-                            @php $status = $item->izin->status ?? null; @endphp
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->npsn }}</td>
@@ -96,12 +92,14 @@
                             <td>{{ $item->jenis->nama ?? '-' }}</td>
                             <td>{{ $item->pengelola }}</td>
                             <td>{{ $item->izin->no_sertifikat ?? '-' }}</td>
-                            <td>{{ $item->izin->masa_berlaku ? \Carbon\Carbon::parse($item->izin->masa_berlaku)->format('d M Y') : '-' }}</td>
                             <td>
-                                @if($status == 'aktif')
-                                    <span class="badge badge-success">Aktif</span>
-                                @elseif(in_array($status, ['habis', 'kadaluarsa']))
-                                    <span class="badge badge-danger">{{ ucfirst($status) }}</span>
+                                {{ $item->izin && $item->izin->masa_berlaku ? \Carbon\Carbon::parse($item->izin->masa_berlaku)->format('d M Y') : '-' }}
+                            </td>
+                            <td>
+                                @if($item->status_teks)
+                                    <span class="badge badge-{{ $item->status_label }}">
+                                        {{ $item->status_teks }}
+                                    </span>
                                 @else
                                     <span class="badge badge-secondary">-</span>
                                 @endif
@@ -124,11 +122,20 @@
     });
 
     function cetakLaporan() {
-        // Ambil forms, simulasikan submit GET dengan JS untuk diarahkan ke route cetak di Tab/Window Baru
         let form = document.getElementById('form-filter');
         let baseUrl = "{{ route('laporan.cetak') }}";
-        let queryString = new URLSearchParams(new FormData(form)).toString();
-        window.open(baseUrl + '?' + queryString, '_blank');
+        
+        // Menggunakan URLSearchParams agar filter yang kosong tidak ikut dikirim
+        let formData = new FormData(form);
+        let params = new URLSearchParams();
+        
+        for (let pair of formData.entries()) {
+            if (pair[1]) {
+                params.append(pair[0], pair[1]);
+            }
+        }
+        
+        window.open(baseUrl + '?' + params.toString(), '_blank');
     }
 </script>
 @endpush
