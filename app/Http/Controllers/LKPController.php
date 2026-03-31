@@ -7,6 +7,7 @@ use App\Models\Lembaga;
 use App\Models\IzinLembaga;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+
 class LKPController extends Controller
 {
     public function __construct()
@@ -68,7 +69,6 @@ class LKPController extends Controller
             'telepon'       => 'required',
             'no_sertifikat' => 'nullable|string',
             'masa_berlaku'  => 'nullable|date',
-            'keterangan'    => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -86,7 +86,6 @@ class LKPController extends Controller
                     'lembaga_id'    => $lembaga->id,
                     'no_sertifikat' => $request->no_sertifikat,
                     'masa_berlaku'  => $request->masa_berlaku,
-                    'keterangan'    => $request->keterangan,
                 ]);
             }
         });
@@ -117,7 +116,6 @@ class LKPController extends Controller
             'telepon'       => 'required',
             'no_sertifikat' => 'nullable|string',
             'masa_berlaku'  => 'nullable|date',
-            'keterangan'    => 'nullable|string',
         ]);
 
         $lembaga = Lembaga::findOrFail($id);
@@ -136,7 +134,6 @@ class LKPController extends Controller
                 [
                     'no_sertifikat' => $request->no_sertifikat,
                     'masa_berlaku'  => $request->masa_berlaku,
-                    'keterangan'    => $request->keterangan,
                 ]
             );
         });

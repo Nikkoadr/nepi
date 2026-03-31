@@ -13,7 +13,6 @@ return new class extends Migration
             $table->foreignId('lembaga_id')->constrained('lembaga')->cascadeOnDelete();
             $table->string('no_sertifikat')->nullable();
             $table->date('masa_berlaku')->nullable();
-            $table->text('keterangan')->nullable();
 
             $table->timestamps();
         });

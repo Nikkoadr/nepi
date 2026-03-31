@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('telepon')->nullable();
             $table->foreignId('jenis_lembaga_id')->constrained('jenis_lembaga')->cascadeOnDelete();
             $table->foreignId('kategori_paud_id')->nullable()->constrained('kategori_paud')->nullOnDelete();
-            $table->text('keterangan')->nullable();
             $table->timestamps();
         });
     }

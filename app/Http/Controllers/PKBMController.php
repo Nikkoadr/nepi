@@ -69,7 +69,6 @@ class PKBMController extends Controller
             'telepon'       => 'required',
             'no_sertifikat' => 'nullable|string',
             'masa_berlaku'  => 'nullable|date',
-            'keterangan'    => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -87,7 +86,6 @@ class PKBMController extends Controller
                     'lembaga_id'    => $lembaga->id,
                     'no_sertifikat' => $request->no_sertifikat,
                     'masa_berlaku'  => $request->masa_berlaku,
-                    'keterangan'    => $request->keterangan,
                 ]);
             }
         });
@@ -117,7 +115,6 @@ class PKBMController extends Controller
             'telepon'       => 'required',
             'no_sertifikat' => 'nullable|string',
             'masa_berlaku'  => 'nullable|date',
-            'keterangan'    => 'nullable|string',
         ]);
 
         $lembaga = Lembaga::findOrFail($id);
@@ -136,7 +133,6 @@ class PKBMController extends Controller
                 [
                     'no_sertifikat' => $request->no_sertifikat,
                     'masa_berlaku'  => $request->masa_berlaku,
-                    'keterangan'    => $request->keterangan,
                 ]
             );
         });

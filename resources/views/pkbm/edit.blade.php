@@ -14,38 +14,54 @@
 
                 <div class="row">
 
-                    <!-- NPSN -->
                     <div class="col-md-6 mb-3">
                         <label>NPSN</label>
-                        <input type="text" name="npsn" class="form-control"
-                            value="{{ old('npsn', $data->npsn) }}" required>
+                        <input type="text" name="npsn" 
+                            class="form-control @error('npsn') is-invalid @enderror"
+                            value="{{ old('npsn', $data->npsn) }}">
+                        @error('npsn')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <!-- Nama -->
                     <div class="col-md-6 mb-3">
                         <label>Nama Lembaga</label>
-                        <input type="text" name="nama_lembaga" class="form-control"
-                            value="{{ old('nama_lembaga', $data->nama_lembaga) }}" required>
+                        <input type="text" name="nama_lembaga" 
+                            class="form-control @error('nama_lembaga') is-invalid @enderror"
+                            value="{{ old('nama_lembaga', $data->nama_lembaga) }}">
+                        @error('nama_lembaga')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <!-- Pengelola -->
                     <div class="col-md-6 mb-3">
                         <label>Pengelola</label>
-                        <input type="text" name="pengelola" class="form-control"
+                        <input type="text" name="pengelola" 
+                            class="form-control @error('pengelola') is-invalid @enderror"
                             value="{{ old('pengelola', $data->pengelola) }}">
+                        @error('pengelola')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <!-- Telepon -->
                     <div class="col-md-6 mb-3">
                         <label>Telepon</label>
-                        <input type="text" name="telepon" class="form-control"
+                        <input type="text" name="telepon" 
+                            class="form-control @error('telepon') is-invalid @enderror"
                             value="{{ old('telepon', $data->telepon) }}">
+                        @error('telepon')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <!-- Alamat -->
                     <div class="col-md-12 mb-3">
                         <label>Alamat</label>
-                        <textarea name="alamat" class="form-control" rows="3">{{ old('alamat', $data->alamat) }}</textarea>
+                        <textarea name="alamat" 
+                            class="form-control @error('alamat') is-invalid @enderror" 
+                            rows="3">{{ old('alamat', $data->alamat) }}</textarea>
+                        @error('alamat')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
                 </div>
@@ -56,25 +72,24 @@
 
                 <div class="row">
 
-                    <!-- No Sertifikat -->
                     <div class="col-md-6 mb-3">
                         <label>No Sertifikat</label>
-                        <input type="text" name="no_sertifikat" class="form-control"
-                            value="{{ old('no_sertifikat', $izin->no_sertifikat ?? '') }}">
+                        <input type="text" name="no_sertifikat" 
+                            class="form-control @error('no_sertifikat') is-invalid @enderror"
+                            value="{{ old('no_sertifikat', $data->izin->no_sertifikat ?? '') }}">
+                        @error('no_sertifikat')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <!-- Masa Berlaku -->
                     <div class="col-md-6 mb-3">
                         <label>Masa Berlaku</label>
-                        <input type="date" name="masa_berlaku" class="form-control"
-                            value="{{ old('masa_berlaku', $izin->masa_berlaku ?? '') }}">
-                    </div>
-
-
-                    <!-- Keterangan -->
-                    <div class="col-md-12 mb-3">
-                        <label>Keterangan</label>
-                        <textarea name="keterangan" class="form-control">{{ old('keterangan', $izin->keterangan ?? '') }}</textarea>
+                        <input type="date" name="masa_berlaku" 
+                            class="form-control @error('masa_berlaku') is-invalid @enderror"
+                            value="{{ old('masa_berlaku', $data->izin->masa_berlaku ?? '') }}">
+                        @error('masa_berlaku')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
                 </div>
